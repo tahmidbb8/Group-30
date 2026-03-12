@@ -73,6 +73,7 @@ echo "<td>".$row["LevelID"]."</td>";
 echo "<td>".$row["ProgrammeLeaderID"]."</td>";
 echo "<td>".$row["Description"]."</td>";
 echo "<td>".$row["Image"]."</td>";
+echo "<td><a href='delete_programme.php?id=".$row["ProgrammeID"]."'>Delete</a></td>";
 echo "</tr>";
 
 }
