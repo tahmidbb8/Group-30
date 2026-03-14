@@ -38,6 +38,7 @@ CREATE TABLE Programmes (
     ProgrammeLeaderID INTEGER,
     Description TEXT,
     Image TEXT,
+    is_published BOOLEAN DEFAULT 1,
     FOREIGN KEY (LevelID) REFERENCES Levels(LevelID),
     FOREIGN KEY (ProgrammeLeaderID) REFERENCES Staff(StaffID)
 );
@@ -57,6 +58,7 @@ CREATE TABLE InterestedStudents (
     StudentName VARCHAR(100) NOT NULL,
     Email VARCHAR(255) NOT NULL,
     RegisteredAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (Email, ProgrammeID),
     FOREIGN KEY (ProgrammeID) REFERENCES Programmes(ProgrammeID) ON DELETE CASCADE
 );
 
