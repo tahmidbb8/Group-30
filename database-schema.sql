@@ -63,6 +63,14 @@ CREATE TABLE InterestedStudents (
     FOREIGN KEY (ProgrammeID) REFERENCES Programmes(ProgrammeID) ON DELETE CASCADE
 );
 
+-- admin table added 
+CREATE TABLE Admins (
+    AdminID INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL
+);
+
+
 -- Seed data
 -- Levels
 INSERT INTO Levels (LevelID, LevelName) VALUES
