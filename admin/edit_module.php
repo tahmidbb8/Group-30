@@ -7,25 +7,24 @@ if (!isset($_SESSION["admin"])) {
     exit();
 }
 
-$id = $_GET["id"];
+$id = (int) $_GET["id"];
 
 $sql = "SELECT * FROM Modules WHERE ModuleID = $id";
 $result = mysqli_query($conn, $sql);
 $row = mysqli_fetch_assoc($result);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-    $ModuleName = $_POST["ModuleName"];
-    $ModuleLeaderID = $_POST["ModuleLeaderID"];
-    $Description = $_POST["Description"];
-    $Image = $_POST["Image"];
+    $ModuleName = trim($_POST["ModuleName"] ?? "");
+    $ModuleLeaderID = trim($_POST["ModuleLeaderID"] ?? "");
+    $Description = trim($_POST["Description"] ?? "");
+    $Image = trim($_POST["Image"] ?? "");
 
     $update = "UPDATE Modules 
-               SET ModuleName='$ModuleName',
-                   ModuleLeaderID='$ModuleLeaderID',
-                   Description='$Description',
-                   Image='$Image'
-               WHERE ModuleID=$id";
+               SET ModuleName = '$ModuleName',
+                   ModuleLeaderID = '$ModuleLeaderID',
+                   Description = '$Description',
+                   Image = '$Image'
+               WHERE ModuleID = $id";
 
     mysqli_query($conn, $update);
 
@@ -34,25 +33,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<h1>Edit Module</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Module</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
 
-<form method="POST">
+<div class="container">
+    <h1>Edit Module</h1>
 
-<label>Module Name</label><br>
-<input type="text" name="ModuleName" value="<?php echo $row['ModuleName']; ?>"><br><br>
+    <form method="POST">
 
-<label>Module Leader ID</label><br>
-<input type="number" name="ModuleLeaderID" value="<?php echo $row['ModuleLeaderID']; ?>"><br><br>
+        <label>Module Name</label>
+        <input type="text" name="ModuleName" value="<?php echo $row['ModuleName']; ?>" required>
 
-<label>Description</label><br>
-<textarea name="Description"><?php echo $row['Description']; ?></textarea><br><br>
+        <label>Module Leader</label>
+        <select name="ModuleLeaderID" required>
+            <option value="">Select Module Leader</option>
 
-<label>Image URL</label><br>
-<input type="text" name="Image" value="<?php echo $row['Image']; ?>"><br><br>
+            <?php
+            $staffQuery = "SELECT * FROM Staff";
+            $staffResult = mysqli_query($conn, $staffQuery);
 
-<button type="submit">Update Module</button>
+            if ($staffResult && mysqli_num_rows($staffResult) > 0) {
+                while ($staff = mysqli_fetch_assoc($staffResult)) {
+                    $selected = ($staff["StaffID"] == $row["ModuleLeaderID"]) ? "selected" : "";
+                    echo "<option value='" . $staff["StaffID"] . "' $selected>" . $staff["Name"] . "</option>";
+                }
+            }
+            ?>
+        </select>
 
-</form>
+        <label>Description</label>
+        <textarea name="Description"><?php echo $row['Description']; ?></textarea>
 
-<br>
-<a href="manage_modules.php">Back</a>
+        <label>Image URL</label>
+        <input type="text" name="Image" value="<?php echo $row['Image']; ?>">
+
+        <button type="submit">Update Module</button>
+
+    </form>
+
+    <br>
+    <a href="manage_modules.php">Back to Manage Modules</a>
+</div>
+
+</body>
+</html>

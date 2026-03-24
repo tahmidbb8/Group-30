@@ -10,18 +10,22 @@ if (!isset($_SESSION["admin"])) {
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $ModuleName = $_POST["ModuleName"];
-    $ModuleLeaderID = $_POST["ModuleLeaderID"];
-    $Description = $_POST["Description"];
-    $Image = $_POST["Image"];
+    $ModuleName = trim($_POST["ModuleName"] ?? "");
+    $ModuleLeaderID = trim($_POST["ModuleLeaderID"] ?? "");
+    $Description = trim($_POST["Description"] ?? "");
+    $Image = trim($_POST["Image"] ?? "");
 
-    $sql = "INSERT INTO Modules (ModuleName, ModuleLeaderID, Description, Image)
-            VALUES ('$ModuleName', '$ModuleLeaderID', '$Description', '$Image')";
-
-    if (mysqli_query($conn, $sql)) {
-        $message = "<p style='color:green;'>Module added successfully!</p>";
+    if (empty($ModuleName) || empty($ModuleLeaderID)) {
+        $message = "<p class='error-msg'>Module name and module leader are required.</p>";
     } else {
-        $message = "<p style='color:red;'>Error adding module.</p>";
+        $sql = "INSERT INTO Modules (ModuleName, ModuleLeaderID, Description, Image)
+                VALUES ('$ModuleName', '$ModuleLeaderID', '$Description', '$Image')";
+
+        if (mysqli_query($conn, $sql)) {
+            $message = "<p class='success-msg'>Module added successfully!</p>";
+        } else {
+            $message = "<p class='error-msg'>Error adding module.</p>";
+        }
     }
 }
 ?>
@@ -32,73 +36,88 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Modules</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
 </head>
 <body>
 
 <div class="container">
 
-<h1>Manage Modules</h1>
+    <h1>Manage Modules</h1>
 
-<?php echo $message; ?>
+    <?php echo $message; ?>
 
-<h2>Add New Module</h2>
+    <h2>Add New Module</h2>
 
-<form method="POST">
-    <label>Module Name:</label>
-    <input type="text" name="ModuleName" required>
+    <form method="POST">
+        <label>Module Name:</label>
+        <input type="text" name="ModuleName" required>
 
-    <label>Module Leader ID:</label>
-    <input type="number" name="ModuleLeaderID">
+        <label>Module Leader:</label>
+        <select name="ModuleLeaderID" required>
+            <option value="">Select Module Leader</option>
 
-    <label>Description:</label>
-    <textarea name="Description"></textarea>
+            <?php
+            $staffQuery = "SELECT * FROM Staff";
+            $staffResult = mysqli_query($conn, $staffQuery);
 
-    <label>Image URL:</label>
-    <input type="text" name="Image">
+            if ($staffResult && mysqli_num_rows($staffResult) > 0) {
+                while ($staff = mysqli_fetch_assoc($staffResult)) {
+                    echo "<option value='" . $staff["StaffID"] . "'>" . $staff["Name"] . "</option>";
+                }
+            }
+            ?>
+        </select>
 
-    <button type="submit">Add Module</button>
-</form>
+        <label>Description:</label>
+        <textarea name="Description"></textarea>
 
-<h2>All Modules</h2>
+        <label>Image URL:</label>
+        <input type="text" name="Image">
 
-<?php
-$sql = "SELECT * FROM Modules";
-$result = mysqli_query($conn, $sql);
+        <button type="submit">Add Module</button>
+    </form>
 
-if ($result && mysqli_num_rows($result) > 0) {
-    echo "<table>";
-    echo "<tr>";
-    echo "<th>ModuleID</th>";
-    echo "<th>ModuleName</th>";
-    echo "<th>ModuleLeaderID</th>";
-    echo "<th>Description</th>";
-    echo "<th>Image</th>";
-    echo "<th>Actions</th>";
-    echo "</tr>";
+    <h2>All Modules</h2>
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    <?php
+    $sql = "SELECT Modules.*, Staff.Name AS StaffName
+            FROM Modules
+            LEFT JOIN Staff ON Modules.ModuleLeaderID = Staff.StaffID";
+    $result = mysqli_query($conn, $sql);
+
+    if ($result && mysqli_num_rows($result) > 0) {
+        echo "<table>";
         echo "<tr>";
-        echo "<td>" . $row["ModuleID"] . "</td>";
-        echo "<td>" . $row["ModuleName"] . "</td>";
-        echo "<td>" . $row["ModuleLeaderID"] . "</td>";
-        echo "<td>" . $row["Description"] . "</td>";
-        echo "<td>" . $row["Image"] . "</td>";
-        echo "<td>
-                <a href='edit_module.php?id=" . $row["ModuleID"] . "'>Edit</a> |
-                <a href='delete_module.php?id=" . $row["ModuleID"] . "' onclick=\"return confirm('Delete this module?');\">Delete</a>
-              </td>";
+        echo "<th>ModuleID</th>";
+        echo "<th>ModuleName</th>";
+        echo "<th>Module Leader</th>";
+        echo "<th>Description</th>";
+        echo "<th>Image</th>";
+        echo "<th>Actions</th>";
         echo "</tr>";
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            echo "<tr>";
+            echo "<td>" . $row["ModuleID"] . "</td>";
+            echo "<td>" . $row["ModuleName"] . "</td>";
+            echo "<td>" . ($row["StaffName"] ? $row["StaffName"] : "Not Assigned") . "</td>";
+            echo "<td>" . $row["Description"] . "</td>";
+            echo "<td>" . $row["Image"] . "</td>";
+            echo "<td>
+                    <a href='edit_module.php?id=" . $row["ModuleID"] . "'>Edit</a> |
+                    <a href='delete_module.php?id=" . $row["ModuleID"] . "' onclick=\"return confirm('Delete this module?');\">Delete</a>
+                  </td>";
+            echo "</tr>";
+        }
+
+        echo "</table>";
+    } else {
+        echo "<p>No modules found.</p>";
     }
+    ?>
 
-    echo "</table>";
-} else {
-    echo "<p>No modules found.</p>";
-}
-?>
-
-<br>
-<a href="dashboard.php">Back to Dashboard</a>
+    <br>
+    <a href="dashboard.php">Back to Dashboard</a>
 
 </div>
 
