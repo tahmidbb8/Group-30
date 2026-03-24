@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($staffResult && mysqli_num_rows($staffResult) > 0) {
                 while ($staff = mysqli_fetch_assoc($staffResult)) {
                     $selected = ($staff["StaffID"] == $row["ModuleLeaderID"]) ? "selected" : "";
-                    echo "<option value='" . $staff["StaffID"] . "' $selected>" . $staff["StaffName"] . "</option>";
+                    echo "<option value='" . $staff["StaffID"] . "' $selected>" . $staff["Name"] . "</option>";
                 }
             }
             ?>

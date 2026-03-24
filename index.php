@@ -1,10 +1,20 @@
 <?php
 include "db.php";
 
-$sql = "SELECT Programmes.*, Levels.LevelName
-        FROM Programmes
-        JOIN Levels ON Programmes.LevelID = Levels.LevelID
-        WHERE Programmes.is_published = 1";
+/* ===== SEARCH LOGIC ===== */
+$where = "WHERE programmes.is_published = 1";
+
+if (!empty($_GET["search"])) {
+    $search = $_GET["search"];
+    $where .= " AND programmes.ProgrammeName LIKE '%$search%'";
+}
+
+/* ===== QUERY ===== */
+$sql = "SELECT programmes.*, Levels.LevelName
+        FROM programmes
+        JOIN Levels ON programmes.LevelID = Levels.LevelID
+        $where";
+
 $result = mysqli_query($conn, $sql);
 ?>
 
@@ -13,39 +23,45 @@ $result = mysqli_query($conn, $sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Course Hub</title>
+    <title>Programmes</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-    <h1>Student Course Hub</h1>
-    <p>Browse our available degree programmes below.</p>
+
+    <h1>All Programmes</h1>
+
+    <!-- ===== SEARCH BAR ===== -->
+    <form method="GET">
+        <input type="text" name="search" placeholder="Search programmes..."
+               value="<?php echo $_GET['search'] ?? ''; ?>">
+        <button type="submit">Search</button>
+    </form>
+
+    <br>
 
     <?php
     if ($result && mysqli_num_rows($result) > 0) {
-        echo "<table>";
-        echo "<tr>";
-        echo "<th>Programme Name</th>";
-        echo "<th>Level</th>";
-        echo "<th>Description</th>";
-        echo "<th>Action</th>";
-        echo "</tr>";
 
         while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr>";
-            echo "<td>" . $row["ProgrammeName"] . "</td>";
-            echo "<td>" . $row["LevelName"] . "</td>";
-            echo "<td>" . $row["Description"] . "</td>";
-            echo "<td><a class='btn' href='programme_details.php?id=" . $row["ProgrammeID"] . "'>View Details</a></td>";
-            echo "</tr>";
+
+            echo "<div style='border:1px solid #ccc; padding:15px; margin-bottom:15px;'>";
+
+            echo "<h2>" . $row["ProgrammeName"] . "</h2>";
+            echo "<p><strong>Level:</strong> " . $row["LevelName"] . "</p>";
+            echo "<p>" . $row["Description"] . "</p>";
+
+            echo "<a class='btn' href='programme_details.php?id=" . $row["ProgrammeID"] . "'>View Details</a>";
+
+            echo "</div>";
         }
 
-        echo "</table>";
     } else {
-        echo "<p>No published programmes found.</p>";
+        echo "<p>No programmes found.</p>";
     }
     ?>
+
 </div>
 
 </body>
