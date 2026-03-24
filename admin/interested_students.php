@@ -7,7 +7,7 @@ if (!isset($_SESSION["admin"])) {
     exit();
 }
 
-$sql = "SELECT InterestedStudents.StudentName, InterestedStudents.Email, Programmes.ProgrammeName
+$sql = "SELECT InterestedStudents.InterestID, InterestedStudents.StudentName, InterestedStudents.Email, Programmes.ProgrammeName
         FROM InterestedStudents
         JOIN Programmes ON InterestedStudents.ProgrammeID = Programmes.ProgrammeID";
 
@@ -29,11 +29,12 @@ $result = mysqli_query($conn, $sql);
 
     <?php
     if ($result && mysqli_num_rows($result) > 0) {
-        echo "<table border='1' cellpadding='10' cellspacing='0'>";
+        echo "<table>";
         echo "<tr>";
         echo "<th>Student Name</th>";
         echo "<th>Email</th>";
         echo "<th>Programme</th>";
+        echo "<th>Actions</th>";
         echo "</tr>";
 
         while ($row = mysqli_fetch_assoc($result)) {
@@ -41,6 +42,9 @@ $result = mysqli_query($conn, $sql);
             echo "<td>" . $row["StudentName"] . "</td>";
             echo "<td>" . $row["Email"] . "</td>";
             echo "<td>" . $row["ProgrammeName"] . "</td>";
+            echo "<td>
+                    <a href='delete_interest.php?id=" . $row["InterestID"] . "' onclick=\"return confirm('Are you sure you want to delete this registration?');\">Delete</a>
+                  </td>";
             echo "</tr>";
         }
 
