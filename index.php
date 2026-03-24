@@ -3,8 +3,8 @@ include "db.php";
 
 $sql = "SELECT Programmes.*, Levels.LevelName
         FROM Programmes
-        JOIN Levels ON Programmes.LevelID = Levels.LevelID";
-
+        JOIN Levels ON Programmes.LevelID = Levels.LevelID
+        WHERE Programmes.is_published = 1";
 $result = mysqli_query($conn, $sql);
 ?>
 

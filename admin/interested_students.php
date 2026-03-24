@@ -14,32 +14,45 @@ $sql = "SELECT InterestedStudents.StudentName, InterestedStudents.Email, Program
 $result = mysqli_query($conn, $sql);
 ?>
 
-<link rel="stylesheet" href="style.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interested Students</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
 
-<h1>Interested Students</h1>
+<div class="container">
+    <h1>Interested Students</h1>
 
-<?php
-if ($result && mysqli_num_rows($result) > 0) {
-    echo "<table>";
-    echo "<tr>";
-    echo "<th>Student Name</th>";
-    echo "<th>Email</th>";
-    echo "<th>Programme</th>";
-    echo "</tr>";
-
-    while ($row = mysqli_fetch_assoc($result)) {
+    <?php
+    if ($result && mysqli_num_rows($result) > 0) {
+        echo "<table border='1' cellpadding='10' cellspacing='0'>";
         echo "<tr>";
-        echo "<td>" . $row["StudentName"] . "</td>";
-        echo "<td>" . $row["Email"] . "</td>";
-        echo "<td>" . $row["ProgrammeName"] . "</td>";
+        echo "<th>Student Name</th>";
+        echo "<th>Email</th>";
+        echo "<th>Programme</th>";
         echo "</tr>";
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            echo "<tr>";
+            echo "<td>" . $row["StudentName"] . "</td>";
+            echo "<td>" . $row["Email"] . "</td>";
+            echo "<td>" . $row["ProgrammeName"] . "</td>";
+            echo "</tr>";
+        }
+
+        echo "</table>";
+    } else {
+        echo "<p>No students have registered interest yet.</p>";
     }
+    ?>
 
-    echo "</table>";
-} else {
-    echo "<p>No interested students found.</p>";
-}
-?>
+    <br>
+    <a href="dashboard.php">Back to Dashboard</a>
+</div>
 
-<br>
-<a href="dashboard.php">Back to Dashboard</a>
+</body>
+</html>
