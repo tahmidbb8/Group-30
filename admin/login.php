@@ -1,46 +1,59 @@
 <?php
 session_start();
-include "../db.php"; // include database connection file
+include "../db.php";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") { // check if form was submitted
+$error = "";
+$success = "";
 
-    $username = $_POST["username"]; // get username from form
-    $password = $_POST["password"]; // get password from form
+if (isset($_GET["logged_out"])) {
+    $success = "Logout successful.";
+}
 
-    if (empty($username)) { // check if username field is empty
-        echo "Username is required<br>";
-    }
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = trim($_POST["username"] ?? "");
+    $password = trim($_POST["password"] ?? "");
 
-    if (empty($password)) { // check if password field is empty
-        echo "Password is required<br>";
-    }
-
-    $sql = "SELECT * FROM AdminUsers WHERE username='$username'"; // search admin table
-    $result = mysqli_query($conn, $sql); // run query
-
-    if (mysqli_num_rows($result) > 0) { // username exists
-
-        $row = mysqli_fetch_assoc($result); // fetch admin record
-
-        if ($password == $row["password"]) { // compare passwords
-            $_SESSION["admin"] = $username; // store admin username in session
-            header("Location: dashboard.php"); // redirect to dashboard
-            exit();
-        } else {
-            echo "Wrong password<br>";
-        }
-
+    if (empty($username)) {
+        $error = "Username is required";
+    } elseif (empty($password)) {
+        $error = "Password is required";
     } else {
-        echo "Admin not found<br>";
-    }
+        $sql = "SELECT * FROM admins WHERE Username = '$username'";
+        $result = mysqli_query($conn, $sql);
 
+        if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+
+            if ($password == $row["PasswordHash"]) {
+                $_SESSION["admin"] = $row["Username"];
+                $_SESSION["admin_id"] = $row["AdminID"];
+
+                header("Location: dashboard.php");
+                exit();
+            } else {
+                $error = "Wrong password";
+            }
+        } else {
+            $error = "Admin not found";
+        }
+    }
 }
 ?>
 
+<link rel="stylesheet" href="../style.css">
+
 <h1>Admin Login</h1>
 
+<?php if (!empty($success)) { ?>
+    <p style="color:green;"><?php echo $success; ?></p>
+<?php } ?>
+
+<?php if (!empty($error)) { ?>
+    <p style="color:red;"><?php echo $error; ?></p>
+<?php } ?>
+
 <form method="POST">
-    <input type="text" name="username" placeholder="Enter username"><br>
-    <input type="password" name="password" placeholder="Enter password"><br>
-    <button type="submit">Login</button>
+    <input type="text" name="username" placeholder="Enter username" required><br><br>
+    <input type="password" name="password" placeholder="Enter password" required><br><br>
+    <button type="submit" name="login">Login</button>
 </form>

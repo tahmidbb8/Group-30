@@ -7,6 +7,8 @@ if (!isset($_SESSION["admin"])) {
     exit();
 }
 
+$message = "";
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ModuleName = $_POST["ModuleName"];
     $ModuleLeaderID = $_POST["ModuleLeaderID"];
@@ -16,33 +18,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "INSERT INTO Modules (ModuleName, ModuleLeaderID, Description, Image)
             VALUES ('$ModuleName', '$ModuleLeaderID', '$Description', '$Image')";
 
-    mysqli_query($conn, $sql);
-
-    echo "<p style='color:green;'>Module added successfully!</p>";
+    if (mysqli_query($conn, $sql)) {
+        $message = "<p style='color:green;'>Module added successfully!</p>";
+    } else {
+        $message = "<p style='color:red;'>Error adding module.</p>";
+    }
 }
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Modules</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
 <h1>Manage Modules</h1>
+
+<?php echo $message; ?>
 
 <h2>Add New Module</h2>
 
 <form method="POST">
-    <label>Module Name:</label><br>
-    <input type="text" name="ModuleName" required><br><br>
+    <label>Module Name:</label>
+    <input type="text" name="ModuleName" required>
 
-    <label>Module Leader ID:</label><br>
-    <input type="number" name="ModuleLeaderID"><br><br>
+    <label>Module Leader ID:</label>
+    <input type="number" name="ModuleLeaderID">
 
-    <label>Description:</label><br>
-    <textarea name="Description"></textarea><br><br>
+    <label>Description:</label>
+    <textarea name="Description"></textarea>
 
-    <label>Image URL:</label><br>
-    <input type="text" name="Image"><br><br>
+    <label>Image URL:</label>
+    <input type="text" name="Image">
 
     <button type="submit">Add Module</button>
 </form>
-
-<br>
 
 <h2>All Modules</h2>
 
@@ -50,8 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $sql = "SELECT * FROM Modules";
 $result = mysqli_query($conn, $sql);
 
-if (mysqli_num_rows($result) > 0) {
-    echo "<table border='1' cellpadding='10'>";
+if ($result && mysqli_num_rows($result) > 0) {
+    echo "<table>";
     echo "<tr>";
     echo "<th>ModuleID</th>";
     echo "<th>ModuleName</th>";
@@ -69,9 +85,9 @@ if (mysqli_num_rows($result) > 0) {
         echo "<td>" . $row["Description"] . "</td>";
         echo "<td>" . $row["Image"] . "</td>";
         echo "<td>
-        <a href='edit_module.php?id=" . $row["ModuleID"] . "'>Edit</a> |
-        <a href='delete_module.php?id=" . $row["ModuleID"] . "'>Delete</a>
-        </td>";
+                <a href='edit_module.php?id=" . $row["ModuleID"] . "'>Edit</a> |
+                <a href='delete_module.php?id=" . $row["ModuleID"] . "' onclick=\"return confirm('Delete this module?');\">Delete</a>
+              </td>";
         echo "</tr>";
     }
 
@@ -83,3 +99,8 @@ if (mysqli_num_rows($result) > 0) {
 
 <br>
 <a href="dashboard.php">Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

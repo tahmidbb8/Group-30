@@ -1,14 +1,12 @@
 <?php
+$host = "localhost";
+$user = "root";
+$password = "";
+$database = "student_course_hub";
 
-$host = "localhost"; // database server
-$username = "root"; // database username
-$password = ""; // database password
-$database = "student_course_hub"; // database name
+$conn = mysqli_connect($host, $user, $password, $database);
 
-$conn = mysqli_connect($host, $username, $password, $database); // create database connection
-
-if (!$conn) { // check if connection failed
-    die("Connection failed: " . mysqli_connect_error()); // show error and stop execution
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
 }
-
 ?>

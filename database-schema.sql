@@ -1,3 +1,4 @@
+
 DROP DATABASE IF EXISTS student_course_hub;
 CREATE DATABASE student_course_hub;
 USE student_course_hub;
