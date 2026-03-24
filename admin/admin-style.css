@@ -1,0 +1,354 @@
+/* General page */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 30px;
+}
+
+/* ===== LOGIN PAGE ===== */
+.login-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 300px;
+    margin: 80px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.login-box h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1f3c88;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 10px;
+    background-color: #1f3c88;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.login-box button:hover {
+    background-color: #162d66;
+}
+
+/* ===== DASHBOARD ===== */
+.dashboard-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    margin: 80px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-box h1 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #1f3c88;
+}
+
+.welcome-text {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.dashboard-links {
+    list-style: none;
+    padding: 0;
+}
+
+.dashboard-links li {
+    margin-bottom: 12px;
+}
+
+.dashboard-links a {
+    display: block;
+    text-decoration: none;
+    background-color: #1f3c88;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.dashboard-links a:hover {
+    background-color: #162d66;
+}
+
+/* ===== MANAGE PROGRAMMES ===== */
+.manage-programmes-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 1200px;
+    margin: 30px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.manage-programmes-box h1 {
+    text-align: center;
+    color: #1f3c88;
+    margin-bottom: 25px;
+}
+
+.manage-programmes-box h2 {
+    color: #1f3c88;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.programme-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.programme-form input,
+.programme-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.programme-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.programme-form button {
+    background-color: #1f3c88;
+    color: white;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.programme-form button:hover {
+    background-color: #162d66;
+}
+
+/* ===== MANAGE MODULES ===== */
+.manage-modules-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 1100px;
+    margin: 30px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.manage-modules-box h1 {
+    text-align: center;
+    color: #1f3c88;
+    margin-bottom: 25px;
+}
+
+.manage-modules-box h2 {
+    color: #1f3c88;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.module-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.module-form input,
+.module-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.module-form button {
+    background-color: #1f3c88;
+    color: white;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.module-form button:hover {
+    background-color: #162d66;
+}
+
+.module-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.module-table th,
+.module-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.module-table th {
+    background-color: #1f3c88;
+    color: white;
+}
+
+.module-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.module-table tr:hover {
+    background-color: #f1f5fb;
+}
+
+/* ===== MESSAGES ===== */
+.success-message {
+    background-color: #dff0d8;
+    color: #2e7d32;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #b71c1c;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+/* ===== STATUS ===== */
+.status-published {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.status-hidden {
+    color: #b71c1c;
+    font-weight: bold;
+}
+
+/* ===== BUTTONS / LINKS ===== */
+.toggle-btn,
+.edit-btn,
+.delete-btn,
+.back-btn {
+    display: inline-block;
+    text-decoration: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+
+.toggle-btn {
+    background-color: #ff9800;
+}
+
+.toggle-btn:hover {
+    background-color: #e68900;
+}
+
+.edit-btn {
+    background-color: #2e7d32;
+}
+
+.edit-btn:hover {
+    background-color: #256528;
+}
+
+.delete-btn {
+    background-color: #c62828;
+}
+
+.delete-btn:hover {
+    background-color: #a61f1f;
+}
+
+.back-btn {
+    background-color: #1f3c88;
+    margin-top: 20px;
+}
+
+.back-btn:hover {
+    background-color: #162d66;
+}
+
+.no-data {
+    margin-top: 15px;
+    font-style: italic;
+}
+
+/* ===== INTERESTED STUDENTS ===== */
+.interested-students-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 1000px;
+    margin: 30px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.interested-students-box h1 {
+    text-align: center;
+    color: #1f3c88;
+    margin-bottom: 25px;
+}
+
+.students-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.students-table th,
+.students-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.students-table th {
+    background-color: #1f3c88;
+    color: white;
+}
+
+.students-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.students-table tr:hover {
+    background-color: #f1f5fb;
+}
