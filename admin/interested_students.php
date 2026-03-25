@@ -24,7 +24,7 @@ $result = mysqli_query($conn, $sql);
 </head>
 <body>
 
-<div class="interested-students-box">
+<div class="container page-box">
     <h1>Interested Students</h1>
 
     <?php
@@ -54,7 +54,7 @@ $result = mysqli_query($conn, $sql);
     }
     ?>
 
-    <a href="dashboard.php" class="back-btn">Back to Dashboard</a>
+    <a href="dashboard.php" class="back-link">Back to Dashboard</a>
 </div>
 
 </body>
