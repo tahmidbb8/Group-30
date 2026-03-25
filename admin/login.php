@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="admin-style.css">
 
 <h1>Admin Login</h1>
 
