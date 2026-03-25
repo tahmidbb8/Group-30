@@ -51,7 +51,7 @@ if (isset($_GET["export"])) {
         Download all students who registered interest as a CSV file.
     </p>
 
-    <a href="export.php?export=true" class="export-btn">Download CSV</a>
+    <a href="export_mailing_list.php?export=true" class="export-btn">Download CSV</a>
 
     <a href="dashboard.php" class="back-btn">Back to Dashboard</a>
 
