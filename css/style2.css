@@ -1,0 +1,576 @@
+/* ============================================================
+   style2.css  —  Programme Detail Page Styles
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ----------------------------------------------------------
+   RESET & BASE — removes default browser spacing/sizing
+   ---------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ----------------------------------------------------------
+   NAVBAR — sticky top bar
+   ---------------------------------------------------------- */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #002147;
+  padding: 0 40px;
+  height: 62px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-links a {
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.nav-links a:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+/* Student Login button */
+.btn-login {
+  background: #1a73e8;
+  color: #fff !important;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-login:hover {
+  background: #1558b0;
+}
+
+/* ----------------------------------------------------------
+   BREADCRUMB — "Home › Programme Name" bar
+   ---------------------------------------------------------- */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 40px;
+  font-size: 13px;
+  color: #666;
+  background: #fff;
+  border-bottom: 1px solid #e0e4ea;
+}
+
+.breadcrumb a {
+  color: #1a73e8;
+  font-weight: 500;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------------
+   HERO IMAGE — tall banner at the top of the page
+   ---------------------------------------------------------- */
+.prog-hero {
+  position: relative;
+  width: 100%;
+  height: 420px;        /* tall enough to look impressive */
+  overflow: hidden;
+}
+
+.prog-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;    /* fills box without stretching */
+  object-position: center;
+  display: block;
+}
+
+/* Dark gradient overlay so text shows on any image */
+.prog-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,33,71,0.88) 0%,
+    rgba(0,33,71,0.25) 60%,
+    transparent 100%
+  );
+}
+
+/* Text overlaid at bottom-left of hero */
+.prog-hero-content {
+  position: absolute;
+  bottom: 40px;
+  left: 50px;
+  color: #fff;
+  max-width: 700px;
+}
+
+/* Pill badge e.g. "MSc · Master's Degree" */
+.prog-level-tag {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.45);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 16px;
+  border-radius: 20px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.prog-hero-content h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* ----------------------------------------------------------
+   STATS BAR — dark row of key facts below the hero
+   Label on top, value below (e.g. "Total Modules" then "6")
+   ---------------------------------------------------------- */
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  background: #002147;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 50px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.stat-item:last-child {
+  border-right: none;
+}
+
+/* Label sits ABOVE the value */
+.stat-lbl {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 4px;
+}
+
+/* The actual value e.g. "6" or "MSc" */
+.stat-num {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+/* ----------------------------------------------------------
+   TWO-COLUMN LAYOUT
+   Left column = main content, Right column = sidebar
+   ---------------------------------------------------------- */
+.prog-layout {
+  display: grid;
+  grid-template-columns: 1fr 290px;
+  gap: 24px;
+  max-width: 1140px;
+  margin: 32px auto 60px;
+  padding: 0 30px;
+  align-items: start;
+}
+
+/* ----------------------------------------------------------
+   LEFT COLUMN
+   ---------------------------------------------------------- */
+.prog-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* White card for each section */
+.content-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e8ecf1;
+}
+
+.content-section h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #002147;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f2f5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.content-section p {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.8;
+}
+
+/* ----------------------------------------------------------
+   PROGRAMME LEADER CARD
+   ---------------------------------------------------------- */
+.leader-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f7f9fc;
+  border: 1px solid #e8ecf1;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+/* Circle avatar showing first initial */
+.leader-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #002147;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.leader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leader-info strong {
+  font-size: 15px;
+  color: #002147;
+}
+
+.leader-info a {
+  font-size: 13px;
+  color: #1a73e8;
+}
+
+.leader-info a:hover {
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------------
+   MODULE COUNT BADGE  — next to "Modules" heading
+   ---------------------------------------------------------- */
+.module-count-badge {
+  background: #002147;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 20px;
+}
+
+/* ----------------------------------------------------------
+   YEAR GROUP — wraps one year's modules
+   ---------------------------------------------------------- */
+.year-group {
+  margin-bottom: 24px;
+}
+
+.year-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #002147;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Small grey pill e.g. "4 modules" */
+.year-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: #777;
+  background: #f0f2f5;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* ----------------------------------------------------------
+   MODULES GRID — 2 cards per row
+   ---------------------------------------------------------- */
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+/* Individual module card */
+.module-card {
+  background: #f7f9fc;
+  border: 1px solid #e8ecf1;
+  border-left: 4px solid #002147;
+  border-radius: 10px;
+  padding: 18px 20px;
+  transition: transform 0.2s, box-shadow 0.2s, border-left-color 0.2s;
+}
+
+.module-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  border-left-color: #1a73e8;
+}
+
+.module-card h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #002147;
+  margin-bottom: 8px;
+}
+
+.module-card p {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+
+/* "Shared across X programmes" badge */
+.shared-badge {
+  display: inline-block;
+  background: #e8f0fe;
+  color: #1a73e8;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+/* Module leader line at bottom of card */
+.module-leader {
+  font-size: 12px !important;
+  color: #666 !important;
+  margin-top: 10px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid #e0e4ea !important;
+}
+
+/* ----------------------------------------------------------
+   SIDEBAR — sticky right column
+   ---------------------------------------------------------- */
+.prog-sidebar {
+  position: sticky;
+  top: 80px;
+}
+
+.sidebar-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8ecf1;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+/* Dark header */
+.sidebar-header {
+  background: #002147;
+  color: #fff;
+  padding: 22px 24px;
+}
+
+.sidebar-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sidebar-header p {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.sidebar-body {
+  padding: 6px 24px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Each row: label left, value right */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 14px;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-lbl {
+  color: #888;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.info-val {
+  font-weight: 600;
+  color: #002147;
+  font-size: 13px;
+  text-align: right;
+}
+
+/* Footer holds both buttons */
+.sidebar-footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid #f0f2f5;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Blue filled button */
+.cta-register {
+  display: block;
+  text-align: center;
+  background: #1a73e8;
+  color: #fff !important;
+  padding: 13px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid #1a73e8;
+  transition: background 0.2s;
+}
+
+.cta-register:hover {
+  background: #1558b0;
+  border-color: #1558b0;
+}
+
+/* Outlined button — clearly different from register */
+.cta-back {
+  display: block;
+  text-align: center;
+  color: #002147 !important;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 2px solid #002147;
+  transition: background 0.2s, color 0.2s;
+}
+
+.cta-back:hover {
+  background: #002147;
+  color: #fff !important;
+}
+
+/* ----------------------------------------------------------
+   FOOTER
+   ---------------------------------------------------------- */
+footer {
+  text-align: center;
+  background: #002147;
+  color: rgba(255,255,255,0.65);
+  font-size: 13px;
+  padding: 20px;
+}
+
+/* ----------------------------------------------------------
+   RESPONSIVE — phones and tablets
+   ---------------------------------------------------------- */
+@media (max-width: 900px) {
+
+  .prog-layout {
+    grid-template-columns: 1fr;  /* single column */
+    padding: 0 16px;
+  }
+
+  .prog-sidebar {
+    position: static;            /* no longer sticky */
+  }
+
+  .modules-grid {
+    grid-template-columns: 1fr; /* one module per row */
+  }
+
+  .prog-hero {
+    height: 260px;
+  }
+
+  .prog-hero-content {
+    left: 20px;
+    bottom: 20px;
+  }
+
+  .prog-hero-content h1 {
+    font-size: 1.6rem;
+  }
+
+  .stats-bar {
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    padding: 14px 30px;
+    flex: 1 1 45%;
+  }
+
+  .breadcrumb,
+  .navbar {
+    padding: 10px 16px;
+  }
+}
