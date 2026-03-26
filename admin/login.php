@@ -40,20 +40,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<link rel="stylesheet" href="admin-style.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
 
-<h1>Admin Login</h1>
+<div class="login-box">
+    <h1>Admin Login</h1>
 
-<?php if (!empty($success)) { ?>
-    <p style="color:green;"><?php echo $success; ?></p>
-<?php } ?>
+    <?php if (!empty($success)) { ?>
+        <p style="color: green;"><?php echo $success; ?></p>
+    <?php } ?>
 
-<?php if (!empty($error)) { ?>
-    <p style="color:red;"><?php echo $error; ?></p>
-<?php } ?>
+    <?php if (!empty($error)) { ?>
+        <p style="color: red;"><?php echo $error; ?></p>
+    <?php } ?>
 
-<form method="POST">
-    <input type="text" name="username" placeholder="Enter username" required><br><br>
-    <input type="password" name="password" placeholder="Enter password" required><br><br>
-    <button type="submit" name="login">Login</button>
-</form>
+    <form method="POST" action="">
+        <input type="text" name="username" placeholder="Enter username" required>
+        <br><br>
+        <input type="password" name="password" placeholder="Enter password" required>
+        <br><br>
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+</body>
+</html>
