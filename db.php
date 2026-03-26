@@ -1,6 +1,6 @@
 <?php
-$host = "localhost";
-$user = "root";
+$host     = "localhost";
+$user     = "root";
 $password = "";
 $database = "student_course_hub";
 

@@ -2,7 +2,6 @@
 session_start();
 include "../db.php";
 
-// if admin session does not exist, send user back to login page
 if (!isset($_SESSION["admin"])) {
     header("Location: login.php");
     exit();
@@ -13,26 +12,38 @@ if (!isset($_GET["id"])) {
     exit();
 }
 
-$id = $_GET["id"];
+$id = (int) $_GET["id"];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $programme_name = $_POST["programme_name"];
-    $level = $_POST["level"];
-    $leader = $_POST["leader"];
+    $programme_name = trim($_POST["programme_name"]);
+    $level          = trim($_POST["level"]);
+    $leader         = trim($_POST["leader"]);
+    $description    = trim($_POST["description"]);
 
-    $sql = "UPDATE programmes 
-            SET ProgrammeName='$programme_name', LevelID='$level', ProgrammeLeaderID='$leader'
-            WHERE ProgrammeID='$id'";
-
-    mysqli_query($conn, $sql);
+    $stmt = mysqli_prepare($conn,
+        "UPDATE programmes 
+         SET ProgrammeName = ?, LevelID = ?, ProgrammeLeaderID = ?, Description = ?
+         WHERE ProgrammeID = ?"
+    );
+    mysqli_stmt_bind_param($stmt, "siisi", $programme_name, $level, $leader, $description, $id);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
 
     header("Location: manage_programmes.php");
     exit();
 }
 
-$sql = "SELECT * FROM programmes WHERE ProgrammeID = '$id'";
-$result = mysqli_query($conn, $sql);
-$row = mysqli_fetch_assoc($result);
+$stmt = mysqli_prepare($conn, "SELECT * FROM programmes WHERE ProgrammeID = ?");
+mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$row    = mysqli_fetch_assoc($result);
+mysqli_stmt_close($stmt);
+
+if (!$row) {
+    header("Location: manage_programmes.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -51,31 +62,38 @@ $row = mysqli_fetch_assoc($result);
 
         <form method="POST">
             <label for="programme_name">Programme Name:</label>
-            <input 
-                type="text" 
-                id="programme_name" 
-                name="programme_name" 
-                value="<?php echo $row['ProgrammeName']; ?>" 
+            <input
+                type="text"
+                id="programme_name"
+                name="programme_name"
+                value="<?php echo htmlspecialchars($row['ProgrammeName']); ?>"
                 required
             >
 
             <label for="level">Level ID:</label>
-            <input 
-                type="text" 
-                id="level" 
-                name="level" 
-                value="<?php echo $row['LevelID']; ?>" 
+            <input
+                type="number"
+                id="level"
+                name="level"
+                value="<?php echo htmlspecialchars($row['LevelID']); ?>"
                 required
             >
 
             <label for="leader">Programme Leader ID:</label>
-            <input 
-                type="text" 
-                id="leader" 
-                name="leader" 
-                value="<?php echo $row['ProgrammeLeaderID']; ?>" 
+            <input
+                type="number"
+                id="leader"
+                name="leader"
+                value="<?php echo htmlspecialchars($row['ProgrammeLeaderID']); ?>"
                 required
             >
+
+            <label for="description">Description:</label>
+            <textarea
+                id="description"
+                name="description"
+                rows="4"
+            ><?php echo htmlspecialchars($row['Description']); ?></textarea>
 
             <button type="submit" class="btn update-btn">Update Programme</button>
         </form>

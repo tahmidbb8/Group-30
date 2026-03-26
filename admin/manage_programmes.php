@@ -11,11 +11,14 @@ if (!isset($_SESSION["admin"])) {
 if (isset($_GET["toggle"])) {
     $ProgrammeID = (int) $_GET["toggle"];
 
-    $sql = "UPDATE programmes
-            SET is_published = NOT is_published
-            WHERE ProgrammeID = $ProgrammeID";
-
-    mysqli_query($conn, $sql);
+    $stmt = mysqli_prepare($conn,
+        "UPDATE programmes 
+         SET is_published = CASE WHEN is_published = 1 THEN 0 ELSE 1 END 
+         WHERE ProgrammeID = ?"
+    );
+    mysqli_stmt_bind_param($stmt, "i", $ProgrammeID);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
 
     header("Location: manage_programmes.php");
     exit();
@@ -25,20 +28,26 @@ if (isset($_GET["toggle"])) {
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $ProgrammeName = trim($_POST["ProgrammeName"] ?? "");
-    $LevelID = trim($_POST["LevelID"] ?? "");
-    $ProgrammeLeaderID = trim($_POST["ProgrammeLeaderID"] ?? "");
-    $Description = trim($_POST["Description"] ?? "");
-    $Image = trim($_POST["Image"] ?? "");
+    $ProgrammeName        = trim($_POST["ProgrammeName"] ?? "");
+    $LevelID              = trim($_POST["LevelID"] ?? "");
+    $ProgrammeLeaderID    = trim($_POST["ProgrammeLeaderID"] ?? "");
+    $Description          = trim($_POST["Description"] ?? "");
+    $Image                = trim($_POST["Image"] ?? "");
 
-    $sql = "INSERT INTO programmes (ProgrammeName, LevelID, ProgrammeLeaderID, Description, Image, is_published)
-            VALUES ('$ProgrammeName', '$LevelID', '$ProgrammeLeaderID', '$Description', '$Image', 1)";
+    $stmt = mysqli_prepare($conn,
+        "INSERT INTO programmes 
+         (ProgrammeName, LevelID, ProgrammeLeaderID, Description, Image, is_published)
+         VALUES (?, ?, ?, ?, ?, 1)"
+    );
+    mysqli_stmt_bind_param($stmt, "siiss", $ProgrammeName, $LevelID, $ProgrammeLeaderID, $Description, $Image);
 
-    if (mysqli_query($conn, $sql)) {
+    if (mysqli_stmt_execute($stmt)) {
         $message = "<p style='color:green;'>Programme added successfully!</p>";
     } else {
-        $message = "<p style='color:red;'>Error adding programme.</p>";
+        $message = "<p style='color:red;'>Error adding programme: " . mysqli_stmt_error($stmt) . "</p>";
     }
+
+    mysqli_stmt_close($stmt);
 }
 ?>
 
@@ -81,42 +90,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <h2>All Programmes</h2>
 
     <?php
-    $sql = "SELECT * FROM programmes";
-    $result = mysqli_query($conn, $sql);
+    $result = mysqli_query($conn, "SELECT * FROM programmes");
 
     if ($result && mysqli_num_rows($result) > 0) {
         echo "<table>";
-        echo "<tr>";
-        echo "<th>ProgrammeID</th>";
-        echo "<th>ProgrammeName</th>";
-        echo "<th>LevelID</th>";
-        echo "<th>ProgrammeLeaderID</th>";
-        echo "<th>Description</th>";
-        echo "<th>Image</th>";
-        echo "<th>Status</th>";
-        echo "<th>Toggle</th>";
-        echo "<th>Actions</th>";
-        echo "</tr>";
+        echo "<tr>
+                <th>ProgrammeID</th>
+                <th>ProgrammeName</th>
+                <th>LevelID</th>
+                <th>ProgrammeLeaderID</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Status</th>
+                <th>Toggle</th>
+                <th>Actions</th>
+              </tr>";
 
         while ($row = mysqli_fetch_assoc($result)) {
             $isPublished = $row["is_published"] ?? 0;
-            $status = $isPublished ? "<span class='status-published'>Published</span>" : "<span class='status-hidden'>Hidden</span>";
-            $toggleText = $isPublished ? "Unpublish" : "Publish";
+            $id          = (int) $row["ProgrammeID"];
 
-            echo "<tr>";
-            echo "<td>" . $row["ProgrammeID"] . "</td>";
-            echo "<td>" . $row["ProgrammeName"] . "</td>";
-            echo "<td>" . $row["LevelID"] . "</td>";
-            echo "<td>" . $row["ProgrammeLeaderID"] . "</td>";
-            echo "<td>" . $row["Description"] . "</td>";
-            echo "<td>" . $row["Image"] . "</td>";
-            echo "<td>" . $status . "</td>";
-            echo "<td><a href='manage_programmes.php?toggle=" . $row["ProgrammeID"] . "'>" . $toggleText . "</a></td>";
-            echo "<td>
-                    <a href='edit_programme.php?id=" . $row["ProgrammeID"] . "'>Edit</a> |
-                    <a href='delete_programme.php?id=" . $row["ProgrammeID"] . "' onclick=\"return confirm('Are you sure you want to delete this programme?');\">Delete</a>
-                  </td>";
-            echo "</tr>";
+            $status      = $isPublished
+                ? "<span class='status-published'>Published</span>"
+                : "<span class='status-hidden'>Hidden</span>";
+
+            $toggleText  = $isPublished ? "Unpublish" : "Publish";
+
+            echo "<tr>
+                    <td>" . htmlspecialchars($row["ProgrammeID"])        . "</td>
+                    <td>" . htmlspecialchars($row["ProgrammeName"])       . "</td>
+                    <td>" . htmlspecialchars($row["LevelID"])             . "</td>
+                    <td>" . htmlspecialchars($row["ProgrammeLeaderID"])   . "</td>
+                    <td>" . htmlspecialchars($row["Description"])         . "</td>
+                    <td>" . htmlspecialchars($row["Image"])               . "</td>
+                    <td>" . $status                                       . "</td>
+                    <td>
+                        <a href='manage_programmes.php?toggle={$id}'>{$toggleText}</a>
+                    </td>
+                    <td>
+                        <a href='edit_programme.php?id={$id}'>Edit</a> |
+                        <a href='delete_programme.php?id={$id}'
+                           onclick=\"return confirm('Are you sure you want to delete this programme?');\">
+                           Delete
+                        </a>
+                    </td>
+                  </tr>";
         }
 
         echo "</table>";
