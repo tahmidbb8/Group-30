@@ -1,7 +1,6 @@
 <?php
 include('../db.php');
 
-
 // Fetch staff using MySQLi
 $query = "SELECT * FROM staff ORDER BY Name ASC";
 $result = mysqli_query($conn, $query);
