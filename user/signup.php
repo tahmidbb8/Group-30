@@ -1,36 +1,52 @@
 <?php
-/*
- *  signup.php — Student registration page
- *  Redesigned with a two-column layout:
- *  Left = branding/info panel, Right = signup form
- * 
- */
+include('../db.php');
 
-include('../config/db.php');
-
-// Only run this code when the form is submitted
+// Run when form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $name     = trim($_POST['name']);
     $email    = trim($_POST['email']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    try {
-        // Check if email already exists
-        $check = $pdo->prepare("SELECT COUNT(*) FROM users WHERE LOWER(email)=LOWER(?)");
-        $check->execute([$email]);
+    // Escape inputs
+    $nameEscaped  = mysqli_real_escape_string($conn, $name);
+    $emailEscaped = mysqli_real_escape_string($conn, $email);
 
-        if ($check->fetchColumn() > 0) {
-            $error = "That email is already registered. Please log in instead.";
-        } else {
-            // Insert new user into database
-            $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-            $stmt->execute([$name, $email, $password]);
+    // ---------------- CHECK IF EMAIL EXISTS ----------------
+    $checkQuery = "
+        SELECT COUNT(*) AS count 
+        FROM users 
+        WHERE LOWER(email) = LOWER('$emailEscaped')
+    ";
+
+    $checkResult = mysqli_query($conn, $checkQuery);
+
+    if (!$checkResult) {
+        die("Database error: " . mysqli_error($conn));
+    }
+
+    $row = mysqli_fetch_assoc($checkResult);
+
+    if ($row['count'] > 0) {
+        $error = "That email is already registered. Please log in instead.";
+    } else {
+
+        // ---------------- INSERT USER ----------------
+        $insertQuery = "
+            INSERT INTO users (name, email, password)
+            VALUES ('$nameEscaped', '$emailEscaped', '$password')
+        ";
+
+        if (mysqli_query($conn, $insertQuery)) {
             $success = true;
+        } else {
+            // Handle duplicate key or other errors
+            if (mysqli_errno($conn) == 1062) {
+                $error = "This email is already in use.";
+            } else {
+                $error = "Database error: " . mysqli_error($conn);
+            }
         }
-    } catch (PDOException $e) {
-        $error = ($e->errorInfo[1] == 1062)
-            ? "This email is already in use."
-            : "Database error: " . $e->getMessage();
     }
 }
 ?>

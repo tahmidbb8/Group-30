@@ -1,113 +1,131 @@
 <?php
-// Start the session so we know who is logged in
 session_start();
+include('../db.php');
 
-// Connect to the database
-include('../config/db.php');
-
-// If the student is not logged in, send them to the login page
+// Check login
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit;
 }
 
-// Get the logged-in student's details from the session
 $user = $_SESSION['user'];
 
-// Handle when the student clicks "Register Interest" or "Remove Interest"
-// We use POST (not GET) so the action is not visible in the URL
+// ---------------- HANDLE ACTIONS ----------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['programme_id'])) {
+
     $programme_id = (int)$_POST['programme_id'];
+    $email = mysqli_real_escape_string($conn, $user['email']);
+    $name  = mysqli_real_escape_string($conn, $user['name']);
 
     if ($_POST['action'] === 'add') {
-        // Add the student's interest to the database
-        // ON DUPLICATE KEY UPDATE means: if they already registered, just refresh the date
-        $stmt = $pdo->prepare("
+
+        $query = "
             INSERT INTO interestedstudents (ProgrammeID, StudentName, Email, RegisteredAt)
-            VALUES (?, ?, ?, NOW())
+            VALUES ($programme_id, '$name', '$email', NOW())
             ON DUPLICATE KEY UPDATE RegisteredAt = NOW()
-        ");
-        $stmt->execute([$programme_id, $user['name'], $user['email']]);
+        ";
+
+        mysqli_query($conn, $query);
 
     } elseif ($_POST['action'] === 'remove') {
-        // Remove the student's interest from the database
-        $stmt = $pdo->prepare("DELETE FROM interestedstudents WHERE ProgrammeID = ? AND Email = ?");
-        $stmt->execute([$programme_id, $user['email']]);
+
+        $query = "
+            DELETE FROM interestedstudents 
+            WHERE ProgrammeID = $programme_id AND Email = '$email'
+        ";
+
+        mysqli_query($conn, $query);
     }
 
-    // Reload the page so the button updates (add becomes remove, or vice versa)
     header("Location: dashboard.php");
     exit;
 }
 
-// Get all levels for the filter dropdown e.g. Bachelor's, Master's
-$levels = $pdo->query("SELECT * FROM levels ORDER BY LevelName")->fetchAll(PDO::FETCH_ASSOC);
+// ---------------- GET LEVELS ----------------
+$levelsResult = mysqli_query($conn, "SELECT * FROM levels ORDER BY LevelName");
+$levels = mysqli_fetch_all($levelsResult, MYSQLI_ASSOC);
 
-// Get the list of programme IDs this student has registered interest in
-$interestStmt = $pdo->prepare("SELECT ProgrammeID FROM interestedstudents WHERE Email = ?");
-$interestStmt->execute([$user['email']]);
-$userInterests = $interestStmt->fetchAll(PDO::FETCH_COLUMN); // returns a flat array of IDs
+// ---------------- GET USER INTERESTS ----------------
+$email = mysqli_real_escape_string($conn, $user['email']);
 
-// Read the search and level filter from the URL e.g. ?search=cyber&level=2
+$interestQuery = "SELECT ProgrammeID FROM interestedstudents WHERE Email = '$email'";
+$interestResult = mysqli_query($conn, $interestQuery);
+
+$userInterests = [];
+while ($row = mysqli_fetch_assoc($interestResult)) {
+    $userInterests[] = $row['ProgrammeID'];
+}
+
+// ---------------- FILTER INPUT ----------------
 $search        = isset($_GET['search']) ? trim($_GET['search']) : '';
 $selectedLevel = isset($_GET['level']) ? (int)$_GET['level'] : 0;
 
-// Build the SQL query dynamically based on what filters are active
-$params = [];
-$where  = "WHERE p.IsPublished = 1"; // always only show published programmes
+// ---------------- BUILD QUERY ----------------
+$where = "WHERE p.is_published = 1";
 
 if ($selectedLevel > 0) {
-    $where   .= " AND p.LevelID = ?";
-    $params[] = $selectedLevel;
+    $where .= " AND p.LevelID = $selectedLevel";
 }
 
 if ($search !== '') {
-    // Search in both name and description columns
-    $where   .= " AND (p.ProgrammeName LIKE ? OR p.Description LIKE ?)";
-    $like     = '%' . $search . '%'; // % means "anything before or after"
-    $params[] = $like;
-    $params[] = $like;
+    $searchEscaped = mysqli_real_escape_string($conn, $search);
+    $where .= " AND (p.ProgrammeName LIKE '%$searchEscaped%' OR p.Description LIKE '%$searchEscaped%')";
 }
 
-// Run the query and get all matching programmes
-$stmt = $pdo->prepare("
+// ---------------- GET PROGRAMMES ----------------
+$query = "
     SELECT p.*, l.LevelName
     FROM programmes p
     JOIN levels l ON p.LevelID = l.LevelID
     $where
     ORDER BY l.LevelID ASC, p.ProgrammeName ASC
-");
-$stmt->execute($params);
-$programmes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+";
 
-// Split programmes into groups so we can show them under separate headings
+$result = mysqli_query($conn, $query);
+$programmes = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+// ---------------- GROUP PROGRAMMES ----------------
 $bachelors = $masters = $other = [];
+
 foreach ($programmes as $p) {
     $lvl = strtolower($p['LevelName']);
-    if (strpos($lvl, 'bachelor') !== false)   $bachelors[] = $p;
-    elseif (strpos($lvl, 'master') !== false) $masters[]   = $p;
-    else                                       $other[]     = $p;
+
+    if (strpos($lvl, 'undergraduate') !== false) {
+        $bachelors[] = $p;
+    } elseif (strpos($lvl, 'postgraduate') !== false) {
+        $masters[] = $p;
+    } else {
+        $other[] = $p;
+    }
 }
 
-// Filter down to just the programmes the student is interested in
-$myInterested = array_filter($programmes, fn($p) => in_array($p['ProgrammeID'], $userInterests));
+// ---------------- USER INTERESTED PROGRAMMES ----------------
+$myInterested = array_filter($programmes, function($p) use ($userInterests) {
+    return in_array($p['ProgrammeID'], $userInterests);
+});
 
-// Pick a relevant image based on keywords in the programme name
+// ---------------- IMAGE FUNCTION ----------------
 function getProgrammeImage($name) {
     $n = strtolower($name);
+
     if (strpos($n, 'artificial intelligence') !== false)
         return 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80';
+
     if (strpos($n, 'computer science') !== false)
         return 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80';
+
     if (strpos($n, 'cyber') !== false)
         return 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80';
+
     if (strpos($n, 'software') !== false)
         return 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80';
+
     if (strpos($n, 'data') !== false)
         return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80';
+
     if (strpos($n, 'machine learning') !== false)
         return 'https://images.unsplash.com/photo-1507146153580-69a1fe6d8aa1?auto=format&fit=crop&w=800&q=80';
-    // Default image if no keyword matched
+
     return 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80';
 }
 ?>

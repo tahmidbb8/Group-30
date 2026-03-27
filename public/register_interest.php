@@ -1,56 +1,60 @@
 <?php
-// Start session to access logged-in user data
 session_start();
-
-// Connect to the database
 include('../config/db.php');
 
-// Get programme ID from the URL — stop if missing
 if (!isset($_GET['id'])) {
   die("Programme not specified.");
 }
 
-// Convert ID to safe integer to prevent SQL injection
 $programme_id = intval($_GET['id']);
 
-// If user is not logged in, redirect to login page
 if (!isset($_SESSION['user_id'])) {
   header("Location: login.php?redirect=register_interest.php?id=$programme_id");
   exit;
 }
 
-// Store the logged-in user's ID
 $user_id = $_SESSION['user_id'];
 
-// Fetch the programme from the database — only if published
-try {
-  $stmt = $pdo->prepare("SELECT * FROM Programmes WHERE ProgrammeID = ? AND IsPublished = 1");
-  $stmt->execute([$programme_id]);
-  $programme = $stmt->fetch(PDO::FETCH_ASSOC);
+// ---------------- GET USER ----------------
+$userQuery = "SELECT name, email FROM users WHERE id = $user_id";
+$userResult = mysqli_query($conn, $userQuery);
+$user = mysqli_fetch_assoc($userResult);
 
-  // Stop if no programme found
-  if (!$programme) {
-    die("Programme not found or unpublished.");
-  }
-} catch (PDOException $e) {
-  die("Database error: " . $e->getMessage());
+if (!$user) {
+  die("User not found.");
 }
 
-// Empty message variables — filled after form is submitted
-$success = $error = "";
+$name  = mysqli_real_escape_string($conn, $user['name']);
+$email = mysqli_real_escape_string($conn, $user['email']);
 
-// Handle form submission — runs when user clicks the register button
+// ---------------- GET PROGRAMME ----------------
+$query = "
+  SELECT * FROM programmes 
+  WHERE ProgrammeID = $programme_id AND is_published = 1
+";
+$result = mysqli_query($conn, $query);
+$programme = mysqli_fetch_assoc($result);
+
+if (!$programme) {
+  die("Programme not found or unpublished.");
+}
+
+// ---------------- FORM HANDLING ----------------
+$success = "";
+$error   = "";
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  try {
-    // Save interest to the database
-    // ON DUPLICATE KEY UPDATE: if already registered, just refresh the timestamp
-    $stmt = $pdo->prepare("INSERT INTO user_interests (UserID, ProgrammeID)
-                           VALUES (?, ?)
-                           ON DUPLICATE KEY UPDATE CreatedAt = CURRENT_TIMESTAMP");
-    $stmt->execute([$user_id, $programme_id]);
-    $success = "You have successfully registered your interest!";
-  } catch (PDOException $e) {
-    $error = "Error saving your interest: " . $e->getMessage();
+
+  $insertQuery = "
+    INSERT INTO interestedstudents (ProgrammeID, StudentName, Email)
+    VALUES ($programme_id, '$name', '$email')
+    ON DUPLICATE KEY UPDATE RegisteredAt = CURRENT_TIMESTAMP
+  ";
+
+  if (mysqli_query($conn, $insertQuery)) {
+    $success = "Interest registered successfully!";
+  } else {
+    $error = "Error: " . mysqli_error($conn);
   }
 }
 ?>

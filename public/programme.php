@@ -1,108 +1,92 @@
 <?php
-/*
- * 
- *  programme.php  —  Single programme detail page
- *  Shows: hero image, stats bar, description, leader,
- *         modules in a grid, and a sidebar info card
- * 
- */
+include('../db.php');
 
-// Connect to database
-include('../config/db.php');
-
-// If no ?id= in the URL, send user back to the list
 if (!isset($_GET['id'])) {
     header("Location: index.php");
     exit;
 }
 
-// Convert ID to a safe integer (never trust raw URL input!)
 $id = intval($_GET['id']);
 
-try {
-    // --------------------------------------------------------
-    //  QUERY 1: Get programme + level name + programme leader
-    // --------------------------------------------------------
-    $stmt = $pdo->prepare("
-        SELECT p.*, l.LevelName,
-               s.Name  AS LeaderName,
-               s.Title AS LeaderTitle,
-               s.Email AS LeaderEmail
-        FROM   programmes p
-        JOIN   levels l ON p.LevelID = l.LevelID
-        LEFT JOIN staff s ON p.ProgrammeLeaderID = s.StaffID
-        WHERE  p.ProgrammeID = ? AND p.IsPublished = 1
-    ");
-    $stmt->execute([$id]);
-    $programme = $stmt->fetch(PDO::FETCH_ASSOC);
+// ---------------- PROGRAMME QUERY ----------------
+$query = "
+    SELECT p.*, l.LevelName,
+           s.Name AS LeaderName
+    FROM programmes p
+    JOIN levels l ON p.LevelID = l.LevelID
+    LEFT JOIN staff s ON p.ProgrammeLeaderID = s.StaffID
+    WHERE p.ProgrammeID = $id AND p.is_published = 1
+";
 
-    // Programme not found — redirect back to list
-    if (!$programme) {
-        header("Location: index.php");
-        exit;
-    }
+$result = mysqli_query($conn, $query);
+$programme = mysqli_fetch_assoc($result);
 
-    // --------------------------------------------------------
-    //  QUERY 2: Get all modules for this programme
-    //           ordered by year then name
-    // --------------------------------------------------------
-    $mod_stmt = $pdo->prepare("
-        SELECT m.ModuleID, m.ModuleName,
-               m.Description AS ModuleDesc,
-               pm.Year,
-               s.Name  AS LeaderName,
-               s.Title AS LeaderTitle,
-               (SELECT COUNT(*) FROM programmemodules pm2
-                WHERE pm2.ModuleID = m.ModuleID) AS SharedCount
-        FROM   programmemodules pm
-        JOIN   modules m   ON pm.ModuleID = m.ModuleID
-        LEFT JOIN staff s  ON m.ModuleLeaderID = s.StaffID
-        WHERE  pm.ProgrammeID = ? AND m.IsPublished = 1
-        ORDER  BY pm.Year ASC, m.ModuleName ASC
-    ");
-    $mod_stmt->execute([$id]);
-    $allModules = $mod_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Group modules into arrays by year: [1 => [...mods], 2 => [...mods]]
-    $modulesByYear = [];
-    foreach ($allModules as $m) {
-        $year = $m['Year'] ?? 0;
-        $modulesByYear[$year][] = $m;
-    }
-    ksort($modulesByYear); // sort so Year 1 comes before Year 2 etc.
-
-    $totalModules = count($allModules);
-
-} catch (PDOException $e) {
-    die("Database error: " . htmlspecialchars($e->getMessage()));
+if (!$programme) {
+    header("Location: index.php");
+    exit;
 }
 
+// ---------------- MODULES QUERY ----------------
+$mod_query = "
+    SELECT m.ModuleID, m.ModuleName,
+           m.Description AS ModuleDesc,
+           pm.Year,
+           s.Name AS LeaderName,
+           (SELECT COUNT(*) FROM programmemodules pm2
+            WHERE pm2.ModuleID = m.ModuleID) AS SharedCount
+    FROM programmemodules pm
+    JOIN modules m ON pm.ModuleID = m.ModuleID
+    LEFT JOIN staff s ON m.ModuleLeaderID = s.StaffID
+    WHERE pm.ProgrammeID = $id
+    ORDER BY pm.Year ASC, m.ModuleName ASC
+";
 
-// --------------------------------------------------------
-//  HELPER: pick a relevant image URL based on programme name
-// --------------------------------------------------------
+$mod_result = mysqli_query($conn, $mod_query);
+$allModules = mysqli_fetch_all($mod_result, MYSQLI_ASSOC);
+
+// Group modules by year
+$modulesByYear = [];
+foreach ($allModules as $m) {
+    $year = $m['Year'] ?? 0;
+    $modulesByYear[$year][] = $m;
+}
+ksort($modulesByYear);
+
+$totalModules = count($allModules);
+
+// ---------------- IMAGE FUNCTION ----------------
 function getProgrammeImage($name) {
     $n = strtolower($name);
+
     if (strpos($n, 'artificial intelligence') !== false)
         return 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1400&q=80';
+
     if (strpos($n, 'computer science') !== false)
         return 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1400&q=80';
+
     if (strpos($n, 'cyber') !== false)
         return 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1400&q=80';
+
     if (strpos($n, 'software') !== false)
         return 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80';
+
     if (strpos($n, 'data') !== false)
         return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1400&q=80';
+
     return 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80';
 }
 
-// Decide the short award label
-$lvl        = strtolower($programme['LevelName']);
+// ---------------- LABELS ----------------
+$lvl = strtolower($programme['LevelName']);
 $levelLabel = '';
-if (strpos($lvl, 'bachelor') !== false)   $levelLabel = 'BSc';
-elseif (strpos($lvl, 'master') !== false) $levelLabel = 'MSc';
 
-// First letter for the avatar circle e.g. "D" for Daniel
+if (strpos($lvl, 'bachelor') !== false) {
+    $levelLabel = 'BSc';
+} elseif (strpos($lvl, 'master') !== false) {
+    $levelLabel = 'MSc';
+}
+
+// Leader initial
 $leaderInitial = !empty($programme['LeaderName'])
     ? strtoupper(substr($programme['LeaderName'], 0, 1))
     : '';
@@ -224,7 +208,7 @@ $leaderInitial = !empty($programme['LeaderName'])
             <div class="leader-avatar"><?= $leaderInitial ?></div>
             <div class="leader-info">
               <strong>
-                <?= htmlspecialchars(trim($programme['LeaderTitle'] . ' ' . $programme['LeaderName'])) ?>
+                <?= htmlspecialchars(trim($programme['LeaderName'])) ?>
               </strong>
               <?php if (!empty($programme['LeaderEmail'])): ?>
                 <a href="mailto:<?= htmlspecialchars($programme['LeaderEmail']) ?>">
@@ -282,7 +266,7 @@ $leaderInitial = !empty($programme['LeaderName'])
                     <?php if (!empty($m['LeaderName'])): ?>
                       <p class="module-leader">
                         👤 <strong>Module Leader:</strong>
-                        <?= htmlspecialchars(trim($m['LeaderTitle'] . ' ' . $m['LeaderName'])) ?>
+                        <?= htmlspecialchars(trim($m['LeaderName'])) ?>
                       </p>
                     <?php endif; ?>
 

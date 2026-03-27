@@ -1,90 +1,62 @@
-
 <?php
-/*
- * Main public page for listing programmes.
- * It reads filters, loads matching data, and shows it on screen.
- */
+include('../db.php');
 
-// Connect to database
-include('../config/db.php');
-
-
-// Read filter values from the URL
-
-// Get selected level, default = 0 for all levels
+// Read filters
 $selectedLevel = isset($_GET['level']) ? (int)$_GET['level'] : 0;
-
-// Get search text and remove extra spaces
 $search        = isset($_GET['search']) ? trim($_GET['search']) : '';
 
+// Load levels
+$levelsResult = mysqli_query($conn, "SELECT * FROM levels ORDER BY LevelName");
+$levels = mysqli_fetch_all($levelsResult, MYSQLI_ASSOC);
 
-// Load all levels for dropdown
+// Build query
+$where = "WHERE p.is_published = 1";
 
-// Fetch all levels as an array
-$levels = $pdo->query("SELECT * FROM levels ORDER BY LevelName")
-->fetchAll(PDO::FETCH_ASSOC);
-
-
-// Build programme query based on filters
-
-$params = [];                          // Stores values safely for SQL
-$where  = "WHERE p.IsPublished = 1";   // Only published programmes
-
-// Add level filter if selected
+// Level filter
 if ($selectedLevel > 0) {
-    $where   .= " AND p.LevelID = ?";
-    $params[] = $selectedLevel;
+    $where .= " AND p.LevelID = " . intval($selectedLevel);
 }
 
-// Add search filter if text was entered
+// Search filter
 if ($search !== '') {
-    $where   .= " AND (p.ProgrammeName LIKE ? OR p.Description LIKE ?)";
-    $like     = '%' . $search . '%';   // Partial match
-    $params[] = $like;
-    $params[] = $like;
+    $searchEscaped = mysqli_real_escape_string($conn, $search);
+    $where .= " AND (p.ProgrammeName LIKE '%$searchEscaped%' OR p.Description LIKE '%$searchEscaped%')";
 }
 
-// Prepare query safely
-$stmt = $pdo->prepare("
+// Final query
+$query = "
     SELECT p.*, l.LevelName
-    FROM   programmes p
-    JOIN   levels l ON p.LevelID = l.LevelID
+    FROM programmes p
+    JOIN levels l ON p.LevelID = l.LevelID
     $where
-    ORDER  BY l.LevelID ASC, p.ProgrammeName ASC
-");
+    ORDER BY l.LevelID ASC, p.ProgrammeName ASC
+";
 
-// Run query and get results
-$stmt->execute($params);
-$programmes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = mysqli_query($conn, $query);
+$programmes = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
+// Stats
+$totalProg  = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM programmes WHERE is_published = 1"))[0];
+$totalStaff = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM staff"))[0];
 
-// Load quick stats for hero section
-
-$totalProg  = $pdo->query("SELECT COUNT(*) FROM programmes WHERE IsPublished = 1")->fetchColumn();
-$totalStaff = $pdo->query("SELECT COUNT(*) FROM staff")->fetchColumn();
-
-
-// Separate programmes by level
-
+// Separate programmes
 $bachelors = [];
 $masters   = [];
 $other     = [];
 
 foreach ($programmes as $p) {
-    $lvl = strtolower($p['LevelName']);  // Easier text matching
+    $lvl = strtolower($p['LevelName']);
 
     if (strpos($lvl, 'bachelor') !== false) {
         $bachelors[] = $p;
     } elseif (strpos($lvl, 'master') !== false) {
         $masters[] = $p;
     } else {
-        $other[] = $p;   // Any other level
+        $other[] = $p;
     }
 }
 
-
-// Pick an image based on programme name
-
+// Image function (unchanged)
 function getProgrammeImage($name) {
     $n = strtolower($name);
 
@@ -103,7 +75,6 @@ function getProgrammeImage($name) {
     if (strpos($n, 'data') !== false)
         return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80';
 
-    // Fallback image
     return 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80';
 }
 ?>
@@ -130,8 +101,9 @@ function getProgrammeImage($name) {
   </div>
 
   <div class="nav-right">
-    <a href="../user/login.php"  class="btn-login">Student Login</a>
-    <a href="../admin/login.php" class="btn-login btn-login-admin">Admin</a>
+    <a href="../user/login.php" class="btn-login">Student Login</a>
+    <a href="../staff/login.php" class="btn-login btn-login-staff">Staff Login</a>
+    <a href="../admin/login.php" class="btn-login btn-login-admin">Admin Login</a>
   </div>
 </nav>
 

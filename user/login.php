@@ -1,33 +1,42 @@
 <?php
-// Start session to store logged-in student info
 session_start();
+include('../db.php');
 
-// Connect to the database
-include('../config/db.php');
-
-// Handle form submission when student clicks Sign In
+// Handle login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $email    = trim($_POST['email']);
     $password = trim($_POST['password']);
 
-    // Find the user in the database by email
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Escape email for safety
+    $emailEscaped = mysqli_real_escape_string($conn, $email);
 
-    // Check if user exists and password is correct
+    // Get user from database
+    $query = "SELECT * FROM users WHERE email = '$emailEscaped'";
+    $result = mysqli_query($conn, $query);
+
+    if (!$result) {
+        die("Database error: " . mysqli_error($conn));
+    }
+
+    $user = mysqli_fetch_assoc($result);
+
+    // Check password
     if ($user && password_verify($password, $user['password'])) {
-        // Save user info in session and redirect to dashboard
+
         $_SESSION['user'] = [
             'id'    => $user['id'],
             'name'  => $user['name'],
             'email' => $user['email']
         ];
+
         header("Location: dashboard.php");
         exit;
+
     } else {
-        // Different error messages depending on what went wrong
-        $error = $user ? "Incorrect password. Please try again." : "No account found with that email.";
+        $error = $user 
+            ? "Incorrect password. Please try again." 
+            : "No account found with that email.";
     }
 }
 ?>

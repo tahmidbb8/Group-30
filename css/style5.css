@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
+<<<<<<< HEAD
+=======
+/* stylling for register interest page/*
+
+>>>>>>> de91f31 (final work)
 /* ===== General Layout ===== */
 body {
   font-family: "Poppins", sans-serif;
@@ -61,6 +66,7 @@ h2, h3 {
   margin-bottom: 15px;
 }
 
+<<<<<<< HEAD
 /* ===== Form ===== */
 .admin-form {
   display: flex;
@@ -98,6 +104,9 @@ h2, h3 {
   box-shadow: 0 0 0 3px rgba(0,33,71,0.1);
   background: #fff;
 }
+=======
+
+>>>>>>> de91f31 (final work)
 
 /* ===== Button ===== */
 .btn {
@@ -191,7 +200,11 @@ table a:hover {
   font-size: 14px;
 }
 
+<<<<<<< HEAD
 /* ===== Page Title (register_interest.php heading area) ===== */
+=======
+/*  Page Title (register_interest.php heading area)  */
+>>>>>>> de91f31 (final work)
 /* Centers the heading and subtitle above the main card */
 .page-title {
   text-align: center;
@@ -211,7 +224,11 @@ table a:hover {
   font-size: 0.9rem;
 }
 
+<<<<<<< HEAD
 /* ===== Stat Row — 3 info boxes in a row ===== */
+=======
+/*  Stat Row — 3 info boxes in a row */
+>>>>>>> de91f31 (final work)
 /* Used on register_interest.php above the main card */
 .stat-row {
   display: grid;

@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
+<<<<<<< HEAD
 /* ===== Base Reset ===== */
+=======
+/* User login styling*/
+
+/*  Base Reset  */
+>>>>>>> de91f31 (final work)
 * {
   margin: 0;
   padding: 0;
@@ -21,7 +27,11 @@ body {
   padding: 40px 20px;
 }
 
+<<<<<<< HEAD
 /* ===== Login Box ===== */
+=======
+/* =====  User Login Box ===== */
+>>>>>>> de91f31 (final work)
 .login-box {
   background: #fff;
   width: 100%;

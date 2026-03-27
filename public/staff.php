@@ -1,14 +1,27 @@
 <?php
-include('../config/db.php');
+include('../db.php');
 
-try {
-    $stmt = $pdo->query("SELECT * FROM staff ORDER BY Name ASC");
-    $staffList = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Error fetching staff data: " . htmlspecialchars($e->getMessage()));
+
+// Fetch staff using MySQLi
+$query = "SELECT * FROM staff ORDER BY Name ASC";
+$result = mysqli_query($conn, $query);
+
+if (!$result) {
+    die("Error fetching staff data: " . mysqli_error($conn));
 }
 
-// Unsplash fallback portraits by index (cycles through a pool)
+$staffList = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+// Ensure missing fields don’t break HTML
+foreach ($staffList as &$s) {
+    $s['Photo'] = $s['Photo'] ?? '';
+    $s['Title'] = $s['Title'] ?? '';
+    $s['Email'] = $s['Email'] ?? '';
+    $s['Bio']   = $s['Bio'] ?? '';
+}
+unset($s);
+
+// Unsplash fallback portraits
 $unsplashPortraits = [
     'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=400&q=80',
     'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
